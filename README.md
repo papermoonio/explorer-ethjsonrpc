@@ -52,6 +52,7 @@ All configuration is done through `VITE_*` environment variables. Copy
 | `VITE_APP_PRIMARY_COLOR` | `#6366f1` | Primary brand color. All UI colors (buttons, accents, borders, ring) and chart colors are derived from this. |
 | `VITE_APP_CHART_COLOR_1` | *(derived from primary)* | Color for the left chart (Transactions per Block). |
 | `VITE_APP_CHART_COLOR_2` | *(primary hue +60°)* | Color for the right chart (Gas Used per Block). |
+| `VITE_HTTP_POLL_INTERVAL_MS` | `1000` | HTTP block polling interval in milliseconds (minimum 500). |
 
 ### Preconfigured Chains
 

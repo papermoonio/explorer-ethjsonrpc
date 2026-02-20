@@ -1,6 +1,4 @@
-import Editor from '@monaco-editor/react'
-import { useResolvedTheme } from '@/stores/app-store'
-import { Skeleton } from '@/components/ui/skeleton'
+import { useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 
 interface RawJsonViewProps {
@@ -14,8 +12,7 @@ function bigIntReplacer(_key: string, value: unknown): unknown {
 }
 
 export function RawJsonView({ data, className }: RawJsonViewProps) {
-  const theme = useResolvedTheme()
-  const monacoTheme = theme === 'dark' ? 'vs-dark' : 'light'
+  const preRef = useRef<HTMLPreElement>(null)
   let json: string
   try {
     json = JSON.stringify(data, bigIntReplacer, 2)
@@ -23,22 +20,25 @@ export function RawJsonView({ data, className }: RawJsonViewProps) {
     json = '// Error: unable to serialize data'
   }
 
+  const handleCopy = useCallback(() => {
+    void navigator.clipboard.writeText(json)
+  }, [json])
+
   return (
-    <div className={cn('h-[600px]', className)}>
-      <Editor
-        language="json"
-        value={json}
-        theme={monacoTheme}
-        loading={<Skeleton className="h-full w-full" />}
-        options={{
-          readOnly: true,
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          lineNumbers: 'on',
-          fontSize: 13,
-          wordWrap: 'on',
-        }}
-      />
+    <div className={cn('relative', className)}>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="absolute right-3 top-3 rounded border bg-card px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+      >
+        Copy
+      </button>
+      <pre
+        ref={preRef}
+        className="h-[600px] overflow-auto rounded-xl border bg-card p-4 text-[13px] leading-relaxed"
+      >
+        {json}
+      </pre>
     </div>
   )
 }

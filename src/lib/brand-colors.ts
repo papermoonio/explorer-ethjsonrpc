@@ -54,10 +54,6 @@ export function applyBrandColors(): void {
   // Skip if the color has no saturation (grayscale) — use default theme
   if (pC < 0.01) return
 
-  // Chart palette: analogous hues close to the primary (±30° increments)
-  const hue = (offset: number) => (pH + offset + 360) % 360
-  const chartHues = [hue(0), hue(30), hue(-30), hue(60), hue(-60)]
-
   const rules: string[] = []
 
   // Light mode overrides
@@ -69,9 +65,7 @@ export function applyBrandColors(): void {
   rules.push(`  --secondary: ${oklchStr(0.97, pC * 0.03, pH)};`)
   rules.push(`  --secondary-fg: ${oklchStr(0.35, pC * 0.5, pH)};`)
   rules.push(`  --ring: ${oklchStr(0.55, pC, pH)};`)
-  chartHues.forEach((h, i) => {
-    rules.push(`  --chart-${i + 1}: ${oklchStr(0.6 + i * 0.025, 0.2, h)};`)
-  })
+  for (let i = 1; i <= 5; i++) rules.push(`  --chart-${i}: ${oklchStr(0.55 + i * 0.04, pC * (1.1 - i * 0.1), pH)};`)
   rules.push('}')
 
   // Dark mode overrides
@@ -85,9 +79,7 @@ export function applyBrandColors(): void {
   rules.push(`  --ring: ${oklchStr(0.55, pC, pH)};`)
   rules.push(`  --border: ${oklchStr(0.35, pC * 0.04, pH)};`)
   rules.push(`  --input: ${oklchStr(0.35, pC * 0.04, pH)};`)
-  chartHues.forEach((h, i) => {
-    rules.push(`  --chart-${i + 1}: ${oklchStr(0.65 + i * 0.025, 0.18, h)};`)
-  })
+  for (let i = 1; i <= 5; i++) rules.push(`  --chart-${i}: ${oklchStr(0.6 + i * 0.04, pC * (1.0 - i * 0.08), pH)};`)
   rules.push('}')
 
   const style = document.createElement('style')

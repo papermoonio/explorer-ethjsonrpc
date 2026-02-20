@@ -37,5 +37,7 @@ export const en = {
     testSuccess: 'Connection successful!',
     testFailed: 'Connection failed. Check the endpoint URL.',
     saved: 'Chain added successfully.',
+    removed: 'Chain removed.',
+    remove: 'Remove chain',
   },
 } as const

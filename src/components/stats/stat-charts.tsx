@@ -28,7 +28,7 @@ function toChartData(blocks: Block[]): ChartDatum[] {
   return [...blocks].reverse().map((b) => ({
     blockNumber: b.number != null ? `#${String(b.number)}` : '#pending',
     txCount: b.transactions.length,
-    gasUsed: Number(b.gasUsed / 1_000_000n),
+    gasUsed: Number(b.gasUsed) / 1_000_000,
   }))
 }
 

@@ -54,9 +54,10 @@ export function applyBrandColors(): void {
   // Skip if the color has no saturation (grayscale) — use default theme
   if (pC < 0.01) return
 
-  // Chart palette: analogous hues close to the primary (±30° increments)
-  const hue = (offset: number) => (pH + offset + 360) % 360
-  const chartHues = [hue(0), hue(30), hue(-30), hue(60), hue(-60)]
+  // Chart colors: use env overrides or derive from primary
+  const { chartColor1, chartColor2 } = env
+  const [c1L, c1C, c1H] = chartColor1 ? hexToOklch(chartColor1) : [pL, pC, pH]
+  const [c2L, c2C, c2H] = chartColor2 ? hexToOklch(chartColor2) : [pL, pC, (pH + 60 + 360) % 360]
 
   const rules: string[] = []
 
@@ -69,9 +70,11 @@ export function applyBrandColors(): void {
   rules.push(`  --secondary: ${oklchStr(0.97, pC * 0.03, pH)};`)
   rules.push(`  --secondary-fg: ${oklchStr(0.35, pC * 0.5, pH)};`)
   rules.push(`  --ring: ${oklchStr(0.55, pC, pH)};`)
-  chartHues.forEach((h, i) => {
-    rules.push(`  --chart-${i + 1}: ${oklchStr(0.6 + i * 0.025, 0.2, h)};`)
-  })
+  rules.push(`  --chart-1: ${oklchStr(Math.min(c1L, 0.6), c1C, c1H)};`)
+  rules.push(`  --chart-2: ${oklchStr(Math.min(c1L, 0.65), c1C * 0.7, c1H)};`)
+  rules.push(`  --chart-3: ${oklchStr(Math.min(c2L, 0.6), c2C, c2H)};`)
+  rules.push(`  --chart-4: ${oklchStr(Math.min(c2L, 0.65), c2C * 0.7, c2H)};`)
+  rules.push(`  --chart-5: ${oklchStr(Math.min(pL, 0.6), pC * 0.8, pH)};`)
   rules.push('}')
 
   // Dark mode overrides
@@ -85,9 +88,11 @@ export function applyBrandColors(): void {
   rules.push(`  --ring: ${oklchStr(0.55, pC, pH)};`)
   rules.push(`  --border: ${oklchStr(0.35, pC * 0.04, pH)};`)
   rules.push(`  --input: ${oklchStr(0.35, pC * 0.04, pH)};`)
-  chartHues.forEach((h, i) => {
-    rules.push(`  --chart-${i + 1}: ${oklchStr(0.65 + i * 0.025, 0.18, h)};`)
-  })
+  rules.push(`  --chart-1: ${oklchStr(Math.max(c1L, 0.65), c1C * 0.85, c1H)};`)
+  rules.push(`  --chart-2: ${oklchStr(Math.max(c1L, 0.7), c1C * 0.6, c1H)};`)
+  rules.push(`  --chart-3: ${oklchStr(Math.max(c2L, 0.65), c2C * 0.85, c2H)};`)
+  rules.push(`  --chart-4: ${oklchStr(Math.max(c2L, 0.7), c2C * 0.6, c2H)};`)
+  rules.push(`  --chart-5: ${oklchStr(Math.max(pL, 0.65), pC * 0.7, pH)};`)
   rules.push('}')
 
   const style = document.createElement('style')

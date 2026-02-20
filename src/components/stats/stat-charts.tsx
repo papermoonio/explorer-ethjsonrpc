@@ -75,7 +75,7 @@ export function StatCharts({ blocks, loading }: StatChartsProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis dataKey="blockNumber" tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }} />
-              <Tooltip contentStyle={{ backgroundColor: 'var(--color-popover)', border: '1px solid var(--color-border)', color: 'var(--color-popover-foreground)', borderRadius: 6 }} itemStyle={{ color: 'var(--color-primary)' }} />
+              <Tooltip contentStyle={{ backgroundColor: 'var(--color-popover)', border: '1px solid var(--color-border)', color: 'var(--color-popover-foreground)', borderRadius: 6 }} itemStyle={{ color: 'var(--color-chart-1)' }} />
               <Bar dataKey="txCount" name="Transactions" fill="var(--color-chart-1)" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -90,7 +90,7 @@ export function StatCharts({ blocks, loading }: StatChartsProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis dataKey="blockNumber" tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }} />
               <YAxis tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }} unit=" M" />
-              <Tooltip contentStyle={{ backgroundColor: 'var(--color-popover)', border: '1px solid var(--color-border)', color: 'var(--color-popover-foreground)', borderRadius: 6 }} itemStyle={{ color: 'var(--color-primary)' }} formatter={(value) => [`${String(value)} M gas`, 'Gas Used']} />
+              <Tooltip contentStyle={{ backgroundColor: 'var(--color-popover)', border: '1px solid var(--color-border)', color: 'var(--color-popover-foreground)', borderRadius: 6 }} itemStyle={{ color: 'var(--color-chart-3)' }} formatter={(value) => [`${String(value)} M gas`, 'Gas Used']} />
               <Bar dataKey="gasUsed" name="Gas Used (M)" fill="var(--color-chart-3)" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

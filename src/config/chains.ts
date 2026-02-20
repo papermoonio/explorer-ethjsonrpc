@@ -20,7 +20,7 @@ export interface Chain {
 export const CONFIRMATIONS_FINALIZED = 20
 
 /** Interval (ms) between head-block refresh polls. */
-export const HEAD_REFRESH_MS = 1_000
+export const HEAD_REFRESH_MS = Math.max(500, parseInt(env.pollIntervalMs, 10) || 1_000)
 
 interface ChainConfigEntry {
   name: string

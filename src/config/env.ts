@@ -11,6 +11,7 @@ export const env = {
   defaultWsUrl: import.meta.env.VITE_DEFAULT_WS_URL ?? '',
   defaultChainId: import.meta.env.VITE_DEFAULT_CHAIN_ID ?? '1',
   chainsConfig: import.meta.env.VITE_CHAINS_CONFIG ?? '',
+  pollIntervalMs: import.meta.env.VITE_POLL_INTERVAL_MS ?? '1000',
   docsUrl: import.meta.env.VITE_DOCS_URL ?? '',
   githubUrl: import.meta.env.VITE_GITHUB_URL ?? '',
 } as const

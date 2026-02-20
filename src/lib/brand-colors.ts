@@ -54,9 +54,9 @@ export function applyBrandColors(): void {
   // Skip if the color has no saturation (grayscale) — use default theme
   if (pC < 0.01) return
 
-  // Chart palette: 5 hues spread evenly from the primary
-  const hue = (offset: number) => (pH + offset) % 360
-  const chartHues = [hue(0), hue(72), hue(144), hue(216), hue(288)]
+  // Chart palette: analogous hues close to the primary (±30° increments)
+  const hue = (offset: number) => (pH + offset + 360) % 360
+  const chartHues = [hue(0), hue(30), hue(-30), hue(60), hue(-60)]
 
   const rules: string[] = []
 

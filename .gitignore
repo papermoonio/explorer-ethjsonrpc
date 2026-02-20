@@ -6,3 +6,4 @@ dist
 *.log
 tsconfig.app.tsbuildinfo
 tsconfig.node.tsbuildinfo
+.claude

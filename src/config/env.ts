@@ -9,6 +9,7 @@ export const env = {
   defaultChainName: import.meta.env.VITE_DEFAULT_CHAIN_NAME ?? 'Ethereum',
   defaultWsUrl: import.meta.env.VITE_DEFAULT_WS_URL ?? '',
   defaultChainId: import.meta.env.VITE_DEFAULT_CHAIN_ID ?? '1',
+  chainsConfig: import.meta.env.VITE_CHAINS_CONFIG ?? '',
   docsUrl: import.meta.env.VITE_DOCS_URL ?? '',
   githubUrl: import.meta.env.VITE_GITHUB_URL ?? '',
 } as const

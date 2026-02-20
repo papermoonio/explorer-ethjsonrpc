@@ -27,7 +27,15 @@ export function useBlockSubscription(): void {
           queryClient.setQueryData(['blockNumber', rpcUrl], blockNumber)
         },
         onError(error) {
-          console.warn('[ws-subscription] block number watch error:', error)
+          const isSocketClosed = error?.name === 'SocketClosedError' ||
+            String(error?.message ?? '').includes('socket has been closed')
+          if (isSocketClosed) {
+            console.warn('[ws-subscription] WebSocket closed, falling back to HTTP polling:', wsUrl)
+            unwatch?.()
+            unwatch = undefined
+          } else {
+            console.warn('[ws-subscription] block number watch error:', error)
+          }
         },
       })
     } catch (err) {

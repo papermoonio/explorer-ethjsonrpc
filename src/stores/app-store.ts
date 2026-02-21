@@ -28,7 +28,7 @@ export const useAppStore = create<AppState>()(
       setSelectedChain: (chain) => set({ selectedChain: chain }),
       addCustomChain: (chain) =>
         set((s) => {
-          if (s.customChains.some((c) => c.id === chain.id)) return s
+          if (defaultChains.some((c) => c.id === chain.id) || s.customChains.some((c) => c.id === chain.id)) return s
           return { customChains: [...s.customChains, chain] }
         }),
       removeCustomChain: (chainId) =>

@@ -9,17 +9,29 @@ function isValidTxHash(hash: string | undefined): hash is `0x${string}` {
   return !!hash && isHex(hash) && hash.length === 66
 }
 
-/** Fetch a transaction by hash. Transactions are immutable so `staleTime` is `Infinity`. */
+/**
+ * Fetch a transaction by hash.
+ *
+ * Pending transactions (blockNumber is null) use a short stale time so the
+ * UI updates once the transaction is mined. Finalized transactions are
+ * cached indefinitely.
+ */
 export function useTransaction(hash: string | undefined) {
   const client = useViemClient()
   const rpcUrl = useAppStore((s) => s.selectedChain.rpcUrl)
+  const { data: head } = useBlockNumber()
 
   return useQuery({
     queryKey: ['transaction', rpcUrl, hash],
     queryFn: () =>
       client.getTransaction({ hash: hash as `0x${string}` }),
     enabled: isValidTxHash(hash),
-    staleTime: Infinity,
+    staleTime: (query) => {
+      const tx = query.state.data
+      if (!tx || tx.blockNumber == null) return 5_000 // pending — poll frequently
+      if (!head) return 10_000
+      return head - tx.blockNumber >= BigInt(CONFIRMATIONS_FINALIZED) ? Infinity : 10_000
+    },
   })
 }
 

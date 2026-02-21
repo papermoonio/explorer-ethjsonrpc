@@ -40,6 +40,7 @@ export const useAppStore = create<AppState>()(
           }
           return {
             customChains: s.customChains.filter((c) => c.id !== chainId),
+            ...(s.selectedChain.id === chainId ? { selectedChain: defaultChains[0]! } : {}),
           }
         }),
 

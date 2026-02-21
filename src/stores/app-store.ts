@@ -22,7 +22,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       selectedChain: defaultChains[0]!,
       customChains: [],
       setSelectedChain: (chain) => set({ selectedChain: chain }),
@@ -31,18 +31,17 @@ export const useAppStore = create<AppState>()(
           if (defaultChains.some((c) => c.id === chain.id) || s.customChains.some((c) => c.id === chain.id)) return s
           return { customChains: [...s.customChains, chain] }
         }),
-      removeCustomChain: (chainId) =>
-        set((s) => {
-          const removed = s.customChains.find((c) => c.id === chainId)
-          if (removed) {
-            removeViemClient(removed.rpcUrl)
-            if (removed.wsUrl) removeWsClient(removed.wsUrl).catch(() => {})
-          }
-          return {
-            customChains: s.customChains.filter((c) => c.id !== chainId),
-            ...(s.selectedChain.id === chainId ? { selectedChain: defaultChains[0]! } : {}),
-          }
-        }),
+      removeCustomChain: (chainId) => {
+        const removed = get().customChains.find((c) => c.id === chainId)
+        set((s) => ({
+          customChains: s.customChains.filter((c) => c.id !== chainId),
+          ...(s.selectedChain.id === chainId ? { selectedChain: defaultChains[0]! } : {}),
+        }))
+        if (removed) {
+          removeViemClient(removed.rpcUrl)
+          if (removed.wsUrl) removeWsClient(removed.wsUrl).catch(() => {})
+        }
+      },
 
       theme: 'system',
       setTheme: (theme) => set({ theme }),

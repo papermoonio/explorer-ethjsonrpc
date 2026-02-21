@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './config/i18n'
-import { initThemeSync } from './stores/app-store'
+import { initThemeSync } from './stores/theme-sync'
 import { applyBrandColors, applyFavicon } from './lib/brand-colors'
 import App from './App'
 

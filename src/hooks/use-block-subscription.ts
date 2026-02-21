@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAppStore } from '@/stores/app-store'
-import { getWsClient } from '@/lib/ws-client'
+import { getWsClient, removeWsClient } from '@/lib/ws-client'
 
 /**
  * Subscribes to `newHeads` via WebSocket (when available) and pushes
@@ -47,6 +47,9 @@ export function useBlockSubscription(): void {
 
     return () => {
       unwatch?.()
+      // Close the WebSocket connection when switching chains or unmounting
+      // to prevent accumulating open connections in the global cache
+      if (wsUrl) removeWsClient(wsUrl).catch(() => {})
     }
   }, [wsUrl, rpcUrl, queryClient])
 }

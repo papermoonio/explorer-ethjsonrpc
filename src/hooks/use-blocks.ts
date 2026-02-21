@@ -1,4 +1,5 @@
-import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { useMemo } from 'react'
+import { useQueries } from '@tanstack/react-query'
 import type { Block } from 'viem'
 import { useViemClient } from './use-viem-client'
 import { useAppStore } from '@/stores/app-store'
@@ -7,19 +8,19 @@ import { CONFIRMATIONS_FINALIZED } from '@/config/chains'
 
 export const MAX_BLOCKS = 250
 
-function isRangeFinalized(to: bigint | undefined, head: bigint | undefined): boolean {
-  if (to == null || head == null) return false
-  return head - to >= BigInt(CONFIRMATIONS_FINALIZED)
+function isBlockFinalized(blockNum: bigint, head: bigint | undefined): boolean {
+  if (head == null) return false
+  return head - blockNum >= BigInt(CONFIRMATIONS_FINALIZED)
 }
 
 /**
  * Fetch a range of block headers (without full transactions).
  *
- * Blocks are returned most-recent-first. Viem's batched HTTP transport
- * coalesces the individual `eth_getBlockByNumber` calls into minimal
- * JSON-RPC batch requests automatically.
+ * Each block is cached individually under `['block', rpcUrl, number, false]`,
+ * so when the range slides by 1 on a new head block, only the single new
+ * block is fetched from the network — the rest are served from cache.
  *
- * Range is capped at MAX_BLOCKS to prevent unbounded requests.
+ * Blocks are returned most-recent-first. Range is capped at MAX_BLOCKS.
  */
 export function useBlocks(from: bigint | undefined, to: bigint | undefined) {
   const client = useViemClient()
@@ -28,20 +29,29 @@ export function useBlocks(from: bigint | undefined, to: bigint | undefined) {
 
   const rangeValid = from != null && to != null && from <= to && Number(to - from) < MAX_BLOCKS
 
-  return useQuery({
-    queryKey: ['blocks', rpcUrl, String(from), String(to)],
-    queryFn: async () => {
-      if (from == null || to == null || from > to) return []
-      const promises: Promise<Block>[] = []
-      for (let i = to; i >= from; i--) {
-        promises.push(
-          client.getBlock({ blockNumber: i, includeTransactions: false }),
-        )
+  const blockNumbers = useMemo(() => {
+    if (!rangeValid || from == null || to == null) return []
+    const nums: bigint[] = []
+    for (let i = to; i >= from; i--) nums.push(i)
+    return nums
+  }, [rangeValid, from, to])
+
+  return useQueries({
+    queries: blockNumbers.map((num) => ({
+      queryKey: ['block', rpcUrl, String(num), false] as const,
+      queryFn: () => client.getBlock({ blockNumber: num, includeTransactions: false }),
+      staleTime: isBlockFinalized(num, head) ? Infinity : 10_000,
+    })),
+    combine: (results) => {
+      const blocks = results
+        .map((r) => r.data)
+        .filter((b): b is Block => b != null)
+      return {
+        data: blocks.length > 0 ? blocks : undefined,
+        isLoading: results.some((r) => r.isLoading),
+        isError: results.some((r) => r.isError),
+        error: results.find((r) => r.error)?.error ?? null,
       }
-      return Promise.all(promises)
     },
-    enabled: rangeValid,
-    placeholderData: keepPreviousData,
-    staleTime: isRangeFinalized(to, head) ? Infinity : 10_000,
   })
 }

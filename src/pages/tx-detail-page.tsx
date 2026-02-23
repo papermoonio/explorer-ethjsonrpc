@@ -13,6 +13,8 @@ export default function TxDetailPage() {
   const { data: receipt, isLoading: receiptLoading } = useTransactionReceipt(hash)
   usePageTitle(tx?.hash ? `Tx ${truncateHash(tx.hash)}` : 'Transaction')
 
+  const isHash = hash?.startsWith('0x') && hash.length === 66
+
   if (txError) {
     return (
       <div className="space-y-4 p-6">
@@ -20,10 +22,18 @@ export default function TxDetailPage() {
           &larr; Back to dashboard
         </Link>
         <Card className="py-4">
-          <CardContent>
+          <CardContent className="space-y-2">
             <p className="text-destructive">
               Failed to load transaction: {txError.message}
             </p>
+            {isHash && (
+              <p className="text-sm">
+                This 64-character hash may be a block hash.{' '}
+                <Link to={`/block/${hash}`} className="text-primary hover:underline">
+                  Try as block hash &rarr;
+                </Link>
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

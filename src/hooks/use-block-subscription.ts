@@ -6,7 +6,9 @@ import { getWsClient, removeWsClient } from '@/lib/ws-client'
 /**
  * Subscribes to `newHeads` via WebSocket (when available) and pushes
  * the latest block number directly into the TanStack Query cache.
- * Falls back silently to HTTP polling when no wsUrl is configured.
+ *
+ * Does nothing when no `wsUrl` is configured — HTTP polling is handled
+ * separately by `useBlockNumber` via TanStack Query's `refetchInterval`.
  */
 export function useBlockSubscription(): void {
   const queryClient = useQueryClient()

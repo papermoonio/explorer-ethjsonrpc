@@ -68,7 +68,7 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4">
         <Link to="/" className="flex shrink-0 items-center gap-2 font-semibold">
-          {env.appLogoUrl && <img src={env.appLogoUrl} alt="" className="size-6" />}
+          {env.appLogoUrl && <img src={env.appLogoUrl} alt="" className="h-8 w-auto object-contain" />}
           <span className="hidden sm:inline">{env.appTitle}</span>
         </Link>
 

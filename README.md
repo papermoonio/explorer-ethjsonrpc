@@ -26,7 +26,7 @@ the browser talks to the RPC node over HTTP and renders everything client-side.
 git clone <repo-url>
 cd explorer-jsonrpc
 pnpm install
-cp .env.example .env    # optional -- defaults work out of the box
+cp .env.ethereum .env   # Ethereum mainnet + Sepolia + Holesky via publicnode
 pnpm dev
 ```
 
@@ -136,22 +136,11 @@ docker build \
 
 ## Example Configurations
 
-### Moonbeam
+### Ethereum (Using publicnode)
 
 ```env
-VITE_APP_TITLE=Moonbeam Block Explorer
-VITE_APP_PRIMARY_COLOR="#5C34A2"
-VITE_APP_CHART_COLOR_1="#5C34A2"
-VITE_APP_CHART_COLOR_2="#00A3E0"
-VITE_CHAINS_CONFIG='[{"name":"Moonbeam","chainId":1284,"rpcUrl":"https://rpc.api.moonbeam.network","wsUrl":"wss://wss.api.moonbeam.network","symbol":"GLMR"},{"name":"Moonriver","chainId":1285,"rpcUrl":"https://rpc.api.moonriver.moonbeam.network","symbol":"MOVR"},{"name":"Moonbase Alpha","chainId":1287,"rpcUrl":"https://rpc.api.moonbase.moonbeam.network","network":"testnet","symbol":"DEV"}]'
-```
-
-### Ethereum Mainnet (simple)
-
-```env
-VITE_DEFAULT_RPC_URL=https://ethereum-rpc.publicnode.com
-VITE_DEFAULT_CHAIN_NAME=Ethereum
-VITE_DEFAULT_CHAIN_ID=1
+# cp .env.ethereum .env
+VITE_CHAINS_CONFIG='[{"name":"Ethereum","chainId":1,"rpcUrl":"https://ethereum-rpc.publicnode.com","wsUrl":"wss://ethereum-rpc.publicnode.com"},{"name":"Sepolia","chainId":11155111,"rpcUrl":"https://ethereum-sepolia-rpc.publicnode.com","wsUrl":"wss://ethereum-sepolia-rpc.publicnode.com","network":"testnet"},{"name":"Holesky","chainId":17000,"rpcUrl":"https://ethereum-holesky-rpc.publicnode.com","wsUrl":"wss://ethereum-holesky-rpc.publicnode.com","network":"testnet"}]'
 ```
 
 ### Local Development (Hardhat / Anvil)
@@ -192,4 +181,4 @@ VITE_DEFAULT_CHAIN_ID=31337
 
 ## License
 
-MIT
+BSD 2-Clause License

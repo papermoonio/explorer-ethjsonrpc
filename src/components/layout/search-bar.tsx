@@ -22,12 +22,12 @@ export function SearchBar() {
       case 'address':
         navigate(`/address/${trimmed}`)
         break
-      case 'txHash':
+      case 'hash':
         // 64-char hex could be tx hash OR block hash.
         // Default to tx; the TxDetailPage will offer "Try as block hash?" if not found.
         navigate(`/tx/${trimmed}`)
         break
-      case 'blockHash':
+      case 'hexBlock':
       case 'blockNumber':
         navigate(`/block/${trimmed}`)
         break

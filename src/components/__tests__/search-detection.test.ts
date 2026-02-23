@@ -7,18 +7,18 @@ describe('search type detection', () => {
     expect(detectSearchType(addr)).toBe('address')
   })
 
-  it('detects a 64-char hex as txHash', () => {
+  it('detects a 64-char hex as hash (ambiguous tx/block)', () => {
     const tx = '0x' + 'b'.repeat(64)
-    expect(detectSearchType(tx)).toBe('txHash')
+    expect(detectSearchType(tx)).toBe('hash')
   })
 
   it('detects all digits as blockNumber', () => {
     expect(detectSearchType('12345678')).toBe('blockNumber')
   })
 
-  it('detects hex with other length as blockHash', () => {
-    const hash = '0x' + 'c'.repeat(20)
-    expect(detectSearchType(hash)).toBe('blockHash')
+  it('detects non-standard hex as hexBlock', () => {
+    const hex = '0x' + 'c'.repeat(20)
+    expect(detectSearchType(hex)).toBe('hexBlock')
   })
 
   it('returns null for empty string', () => {

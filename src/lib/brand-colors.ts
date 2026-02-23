@@ -4,7 +4,7 @@ import { env } from '@/config/env'
  * Convert a hex color string (#rrggbb) to OKLch components [L, C, h].
  * Returns [0.5, 0, 0] (neutral gray) on invalid input.
  */
-function hexToOklch(hex: string): [number, number, number] {
+export function hexToOklch(hex: string): [number, number, number] {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex)
   if (!m?.[1]) return [0.5, 0, 0]
 
@@ -40,22 +40,24 @@ function oklchStr(L: number, C: number, h: number): string {
   return `oklch(${L.toFixed(3)} ${C.toFixed(3)} ${h.toFixed(1)})`
 }
 
+export interface BrandColorInput {
+  primaryColor: string
+  chartColor1?: string
+  chartColor2?: string
+}
+
 /**
- * Apply brand colors from env to CSS custom properties.
- * Injects a <style> tag with :root and .dark overrides.
- * Call once at app startup.
+ * Pure function: derive theme CSS from brand colors.
+ * Returns the CSS string, or `null` if the input is invalid / grayscale.
+ * No DOM access — safe for SSR and unit testing.
  */
-export function applyBrandColors(): void {
-  const { primaryColor } = env
-  if (!primaryColor) return
+export function generateBrandCss(input: BrandColorInput): string | null {
+  const { primaryColor, chartColor1, chartColor2 } = input
+  if (!primaryColor) return null
 
-  const [pL, pC, pH] = hexToOklch(primaryColor || '#6366f1')
+  const [pL, pC, pH] = hexToOklch(primaryColor)
+  if (pC < 0.01) return null // grayscale — use default theme
 
-  // Skip if the color has no saturation (grayscale) — use default theme
-  if (pC < 0.01) return
-
-  // Chart colors: 5 distinct hues. Use env overrides for first two, derive the rest.
-  const { chartColor1, chartColor2 } = env
   const hue = (offset: number) => (pH + offset + 360) % 360
   const chartHues: [number, number, number, number, number] = (() => {
     if (chartColor1 && chartColor2) {
@@ -64,7 +66,6 @@ export function applyBrandColors(): void {
       const mid = (h1 + h2) / 2
       return [h1, h2, hue(120), hue(-60), mid]
     }
-    // Analogous spread: 0°, +30°, -30°, +60°, -60° from primary
     return [hue(0), hue(30), hue(-30), hue(60), hue(-60)]
   })()
   const cL = pL, cC = pC
@@ -105,9 +106,25 @@ export function applyBrandColors(): void {
   rules.push(`  --chart-5: ${oklchStr(Math.max(cL, 0.65), cC * 0.7, chartHues[4])};`)
   rules.push('}')
 
+  return rules.join('\n')
+}
+
+/**
+ * Apply brand colors from env to CSS custom properties.
+ * Injects a <style> tag with :root and .dark overrides.
+ * Call once at app startup.
+ */
+export function applyBrandColors(): void {
+  const css = generateBrandCss({
+    primaryColor: env.primaryColor,
+    chartColor1: env.chartColor1 || undefined,
+    chartColor2: env.chartColor2 || undefined,
+  })
+  if (!css) return
+
   const style = document.createElement('style')
   style.setAttribute('data-brand-colors', '')
-  style.textContent = rules.join('\n')
+  style.textContent = css
   document.head.appendChild(style)
 }
 

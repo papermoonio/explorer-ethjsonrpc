@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAppStore } from '@/stores/app-store'
-import { getViemClient, removeViemClient } from '@/lib/viem-client'
-import { getWsClient, removeWsClient } from '@/lib/ws-client'
+import { removeViemClient } from '@/lib/viem-client'
+import { removeWsClient } from '@/lib/ws-client'
+import { detectProtocol, testEndpoint, testHttpRpc } from '@/lib/chain-test'
 import { defaultChains, type Chain } from '@/config/chains'
 
 interface AddChainDialogProps {
@@ -55,17 +56,15 @@ export function AddChainDialog({ open, onOpenChange }: AddChainDialogProps) {
     setTesting(true)
     setTestPassed(false)
 
-    // If details are visible, test the HTTP RPC URL
+    // If details are visible, re-test the HTTP RPC URL
     if (showDetails && rpcUrl) {
       try {
-        const httpClient = getViemClient(rpcUrl)
-        const remoteChainId = await httpClient.getChainId()
+        const remoteChainId = await testHttpRpc(rpcUrl)
         setChainId(String(remoteChainId))
         setTestPassed(true)
         toast.success(t('chain.testSuccess'))
       } catch {
         toast.error(t('chain.testFailed'))
-        removeViemClient(rpcUrl)
       } finally {
         setTesting(false)
       }
@@ -73,60 +72,27 @@ export function AddChainDialog({ open, onOpenChange }: AddChainDialogProps) {
     }
 
     const url = endpointUrl.trim()
-    const isWs = /^wss?:\/\//.test(url)
-    const isHttp = /^https?:\/\//.test(url)
-
-    if (!isWs && !isHttp) {
+    if (!detectProtocol(url)) {
       toast.error(t('chain.invalidProtocol'))
       setTesting(false)
       return
     }
 
     try {
-      if (isWs) {
-        // Validate the WebSocket endpoint directly
-        const wsClient = getWsClient(url)
-        if (!wsClient) {
-          toast.error(t('chain.testFailed'))
-          setTesting(false)
-          return
-        }
-        const remoteChainId = await wsClient.getChainId()
-        setWsUrl(url)
-        setChainId(String(remoteChainId))
+      const result = await testEndpoint(url)
+      setChainId(String(result.chainId))
+      setRpcUrl(result.rpcUrl)
+      setWsUrl(result.wsUrl)
+      setShowDetails(true)
 
-        // Try to derive an HTTP URL as convenience (but don't fail if it doesn't work)
-        const derivedHttp = url.replace(/^wss:\/\//, 'https://').replace(/^ws:\/\//, 'http://')
-        try {
-          const httpClient = getViemClient(derivedHttp)
-          await httpClient.getChainId()
-          setRpcUrl(derivedHttp)
-          setTestPassed(true)
-          toast.success(t('chain.testSuccess'))
-        } catch {
-          removeViemClient(derivedHttp)
-          setRpcUrl('')
-          setTestPassed(false)
-          toast.info(t('chain.httpRequired'))
-        }
-        setShowDetails(true)
-      } else {
-        const httpClient = getViemClient(url)
-        const remoteChainId = await httpClient.getChainId()
-        setRpcUrl(url)
-        setWsUrl('')
-        setChainId(String(remoteChainId))
+      if (result.rpcUrl) {
         setTestPassed(true)
-        setShowDetails(true)
         toast.success(t('chain.testSuccess'))
+      } else {
+        toast.info(t('chain.httpRequired'))
       }
     } catch {
       toast.error(t('chain.testFailed'))
-      if (isWs) {
-        removeWsClient(url).catch(() => {})
-      } else {
-        removeViemClient(url)
-      }
     } finally {
       setTesting(false)
     }

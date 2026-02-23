@@ -79,7 +79,9 @@ function buildDefaultChains(): Chain[] {
       displayName: env.defaultChainName,
       rpcUrl: env.defaultRpcUrl,
       wsUrl: env.defaultWsUrl || undefined,
-      network: 'mainnet',
+      network: (['mainnet', 'testnet', 'devnet'].includes(env.defaultNetworkType)
+        ? env.defaultNetworkType
+        : 'mainnet') as Chain['network'],
       nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     },
   ]

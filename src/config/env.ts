@@ -10,6 +10,7 @@ export const env = {
   defaultChainName: import.meta.env.VITE_DEFAULT_CHAIN_NAME ?? 'Ethereum',
   defaultWsUrl: import.meta.env.VITE_DEFAULT_WS_URL ?? '',
   defaultChainId: import.meta.env.VITE_DEFAULT_CHAIN_ID ?? '1',
+  defaultNetworkType: import.meta.env.VITE_DEFAULT_NETWORK_TYPE ?? 'mainnet',
   chainsConfig: import.meta.env.VITE_CHAINS_CONFIG ?? '',
   httpPollIntervalMs: import.meta.env.VITE_HTTP_POLL_INTERVAL_MS ?? '1000',
   docsUrl: import.meta.env.VITE_DOCS_URL ?? '',

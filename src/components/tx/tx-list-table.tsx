@@ -37,7 +37,7 @@ function SkeletonRows() {
 }
 
 export function TxListTable({ transactions, loading }: TxListTableProps) {
-  const hasAnyFull = transactions.some(isFullTransaction)
+  const hasAnyFull = loading || transactions.some(isFullTransaction)
 
   return (
     <div className="overflow-x-auto">

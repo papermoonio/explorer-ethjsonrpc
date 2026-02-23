@@ -1,18 +1,5 @@
 import { describe, it, expect } from 'vitest'
-
-// Extracted search type detection logic matching search-bar.tsx patterns
-function detectSearchType(
-  input: string,
-): 'address' | 'txHash' | 'blockNumber' | 'blockHash' | null {
-  const trimmed = input.trim()
-  if (!trimmed) return null
-  if (/^0x[0-9a-fA-F]{40}$/.test(trimmed)) return 'address'
-  if (/^0x[0-9a-fA-F]{64}$/.test(trimmed)) return 'txHash'
-  if (trimmed.startsWith('0x') && /^0x[0-9a-fA-F]+$/.test(trimmed))
-    return 'blockHash'
-  if (/^\d+$/.test(trimmed)) return 'blockNumber'
-  return null
-}
+import { detectSearchType } from '@/lib/search'
 
 describe('search type detection', () => {
   it('detects a 40-char hex as address', () => {

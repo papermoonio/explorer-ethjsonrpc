@@ -5,10 +5,7 @@ import { Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-
-const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/
-const HASH_RE = /^0x[0-9a-fA-F]{64}$/
-const BLOCK_NUMBER_RE = /^\d+$/
+import { detectSearchType } from '@/lib/search'
 
 export function SearchBar() {
   const [query, setQuery] = useState('')
@@ -20,20 +17,23 @@ export function SearchBar() {
     const trimmed = query.trim()
     if (!trimmed) return
 
-    if (ADDRESS_RE.test(trimmed)) {
-      navigate(`/address/${trimmed}`)
-    } else if (HASH_RE.test(trimmed)) {
-      // 64-char hex could be tx hash OR block hash.
-      // Default to tx; the TxDetailPage will offer "Try as block hash?" if not found.
-      navigate(`/tx/${trimmed}`)
-    } else if (trimmed.startsWith('0x') && /^0x[0-9a-fA-F]+$/.test(trimmed)) {
-      // Hex that's not 40 or 64 chars — try as block hash/number
-      navigate(`/block/${trimmed}`)
-    } else if (BLOCK_NUMBER_RE.test(trimmed)) {
-      navigate(`/block/${trimmed}`)
-    } else {
-      toast.error(t('search.invalid'))
-      return
+    const type = detectSearchType(trimmed)
+    switch (type) {
+      case 'address':
+        navigate(`/address/${trimmed}`)
+        break
+      case 'txHash':
+        // 64-char hex could be tx hash OR block hash.
+        // Default to tx; the TxDetailPage will offer "Try as block hash?" if not found.
+        navigate(`/tx/${trimmed}`)
+        break
+      case 'blockHash':
+      case 'blockNumber':
+        navigate(`/block/${trimmed}`)
+        break
+      default:
+        toast.error(t('search.invalid'))
+        return
     }
 
     setQuery('')

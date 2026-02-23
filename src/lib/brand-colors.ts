@@ -54,10 +54,20 @@ export function applyBrandColors(): void {
   // Skip if the color has no saturation (grayscale) — use default theme
   if (pC < 0.01) return
 
-  // Chart colors: use env overrides or derive from primary
+  // Chart colors: 5 distinct hues. Use env overrides for first two, derive the rest.
   const { chartColor1, chartColor2 } = env
-  const [c1L, c1C, c1H] = chartColor1 ? hexToOklch(chartColor1) : [pL, pC, pH]
-  const [c2L, c2C, c2H] = chartColor2 ? hexToOklch(chartColor2) : [pL, pC, (pH + 60 + 360) % 360]
+  const hue = (offset: number) => (pH + offset + 360) % 360
+  const chartHues: [number, number, number, number, number] = (() => {
+    if (chartColor1 && chartColor2) {
+      const [, , h1] = hexToOklch(chartColor1)
+      const [, , h2] = hexToOklch(chartColor2)
+      const mid = (h1 + h2) / 2
+      return [h1, h2, hue(120), hue(-60), mid]
+    }
+    // Analogous spread: 0°, +30°, -30°, +60°, -60° from primary
+    return [hue(0), hue(30), hue(-30), hue(60), hue(-60)]
+  })()
+  const cL = pL, cC = pC
 
   const rules: string[] = []
 
@@ -70,11 +80,11 @@ export function applyBrandColors(): void {
   rules.push(`  --secondary: ${oklchStr(0.97, pC * 0.03, pH)};`)
   rules.push(`  --secondary-fg: ${oklchStr(0.35, pC * 0.5, pH)};`)
   rules.push(`  --ring: ${oklchStr(0.55, pC, pH)};`)
-  rules.push(`  --chart-1: ${oklchStr(Math.min(c1L, 0.6), c1C, c1H)};`)
-  rules.push(`  --chart-2: ${oklchStr(Math.min(c1L, 0.65), c1C * 0.7, c1H)};`)
-  rules.push(`  --chart-3: ${oklchStr(Math.min(c2L, 0.6), c2C, c2H)};`)
-  rules.push(`  --chart-4: ${oklchStr(Math.min(c2L, 0.65), c2C * 0.7, c2H)};`)
-  rules.push(`  --chart-5: ${oklchStr(Math.min(pL, 0.6), pC * 0.8, pH)};`)
+  rules.push(`  --chart-1: ${oklchStr(Math.min(cL, 0.6), cC, chartHues[0])};`)
+  rules.push(`  --chart-2: ${oklchStr(Math.min(cL, 0.6), cC, chartHues[1])};`)
+  rules.push(`  --chart-3: ${oklchStr(Math.min(cL, 0.6), cC, chartHues[2])};`)
+  rules.push(`  --chart-4: ${oklchStr(Math.min(cL, 0.6), cC * 0.85, chartHues[3])};`)
+  rules.push(`  --chart-5: ${oklchStr(Math.min(cL, 0.6), cC * 0.85, chartHues[4])};`)
   rules.push('}')
 
   // Dark mode overrides
@@ -88,11 +98,11 @@ export function applyBrandColors(): void {
   rules.push(`  --ring: ${oklchStr(0.55, pC, pH)};`)
   rules.push(`  --border: ${oklchStr(0.35, pC * 0.04, pH)};`)
   rules.push(`  --input: ${oklchStr(0.35, pC * 0.04, pH)};`)
-  rules.push(`  --chart-1: ${oklchStr(Math.max(c1L, 0.65), c1C * 0.85, c1H)};`)
-  rules.push(`  --chart-2: ${oklchStr(Math.max(c1L, 0.7), c1C * 0.6, c1H)};`)
-  rules.push(`  --chart-3: ${oklchStr(Math.max(c2L, 0.65), c2C * 0.85, c2H)};`)
-  rules.push(`  --chart-4: ${oklchStr(Math.max(c2L, 0.7), c2C * 0.6, c2H)};`)
-  rules.push(`  --chart-5: ${oklchStr(Math.max(pL, 0.65), pC * 0.7, pH)};`)
+  rules.push(`  --chart-1: ${oklchStr(Math.max(cL, 0.65), cC * 0.85, chartHues[0])};`)
+  rules.push(`  --chart-2: ${oklchStr(Math.max(cL, 0.65), cC * 0.85, chartHues[1])};`)
+  rules.push(`  --chart-3: ${oklchStr(Math.max(cL, 0.65), cC * 0.85, chartHues[2])};`)
+  rules.push(`  --chart-4: ${oklchStr(Math.max(cL, 0.65), cC * 0.7, chartHues[3])};`)
+  rules.push(`  --chart-5: ${oklchStr(Math.max(cL, 0.65), cC * 0.7, chartHues[4])};`)
   rules.push('}')
 
   const style = document.createElement('style')

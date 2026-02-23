@@ -43,7 +43,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <GlobalSubscriptions />
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <div className="flex min-h-screen flex-col bg-background text-foreground">
           <Header />
           <main className="flex-1">

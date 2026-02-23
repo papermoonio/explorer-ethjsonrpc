@@ -56,8 +56,12 @@ export function useTransactionReceipt(hash: string | undefined) {
     queryFn: () =>
       client.getTransactionReceipt({ hash: hash as `0x${string}` }),
     enabled: isValidTxHash(hash),
-    // Compute staleTime eagerly at render time (avoids stale closure in callback form)
-    staleTime: 10_000,
+    staleTime: (query) => {
+      const receipt = query.state.data
+      if (!receipt) return 5_000 // pending — poll frequently
+      if (!head) return 10_000
+      return head - receipt.blockNumber >= BigInt(CONFIRMATIONS_FINALIZED) ? Infinity : 10_000
+    },
     refetchInterval: (query) => {
       const receipt = query.state.data
       if (!receipt) return 5_000 // Pending — poll

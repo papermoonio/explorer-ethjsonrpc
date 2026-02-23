@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import { useQueries } from '@tanstack/react-query'
-import type { Block } from 'viem'
 import { useViemClient } from './use-viem-client'
 import { useAppStore } from '@/stores/app-store'
 import { useBlockNumber } from './use-block-number'
@@ -45,7 +44,7 @@ export function useBlocks(from: bigint | undefined, to: bigint | undefined) {
     combine: (results) => {
       const blocks = results
         .map((r) => r.data)
-        .filter((b): b is Block => b != null)
+        .filter(<T,>(b: T | undefined): b is T => b != null)
       return {
         data: blocks.length > 0 ? blocks : undefined,
         isLoading: results.some((r) => r.isLoading),

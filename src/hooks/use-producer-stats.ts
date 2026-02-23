@@ -22,7 +22,7 @@ export interface ProducerStat {
 }
 
 export function useProducerStats() {
-  const { data: head } = useBlockNumber()
+  const { data: head, isLoading: isHeadLoading } = useBlockNumber()
 
   const from =
     head != null
@@ -32,7 +32,8 @@ export function useProducerStats() {
       : undefined
   const to = head
 
-  const { data: blocks, isLoading, isError, error } = useBlocks(from, to)
+  const { data: blocks, isLoading: isBlocksLoading, isError, error } = useBlocks(from, to)
+  const isLoading = isHeadLoading || isBlocksLoading
 
   const stats = useMemo(() => {
     if (!blocks || blocks.length === 0) return []

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { usePageTitle } from '@/hooks/use-page-title'
 import { useBlockWithTransactions } from '@/hooks/use-block'
@@ -6,11 +7,14 @@ import { TxListTable } from '@/components/tx/tx-list-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
+const TX_PAGE_SIZE = 50
+
 export default function BlockDetailPage() {
   const { hashOrNumber } = useParams()
   const decoded = hashOrNumber ? decodeURIComponent(hashOrNumber) : undefined
   const { data: block, isLoading, error } = useBlockWithTransactions(decoded)
   usePageTitle(block ? `Block #${block.number}` : 'Block')
+  const [visibleCount, setVisibleCount] = useState(TX_PAGE_SIZE)
 
   if (error) {
     return (
@@ -50,7 +54,18 @@ export default function BlockDetailPage() {
             <CardTitle>Transactions ({block.transactions.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            <TxListTable transactions={block.transactions} />
+            <TxListTable transactions={block.transactions.slice(0, visibleCount)} />
+            {block.transactions.length > visibleCount && (
+              <div className="flex items-center justify-center border-t px-4 pt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setVisibleCount((c) => c + TX_PAGE_SIZE)}
+                >
+                  Show More ({block.transactions.length - visibleCount} remaining)
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 
 interface RawJsonViewProps {
@@ -13,12 +13,13 @@ function bigIntReplacer(_key: string, value: unknown): unknown {
 
 export function RawJsonView({ data, className }: RawJsonViewProps) {
   const preRef = useRef<HTMLPreElement>(null)
-  let json: string
-  try {
-    json = JSON.stringify(data, bigIntReplacer, 2)
-  } catch {
-    json = '// Error: unable to serialize data'
-  }
+  const json = useMemo(() => {
+    try {
+      return JSON.stringify(data, bigIntReplacer, 2)
+    } catch {
+      return '// Error: unable to serialize data'
+    }
+  }, [data])
 
   const handleCopy = useCallback(() => {
     void navigator.clipboard.writeText(json)

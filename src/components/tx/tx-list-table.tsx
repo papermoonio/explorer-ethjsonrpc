@@ -37,7 +37,7 @@ function SkeletonRows() {
 }
 
 export function TxListTable({ transactions, loading }: TxListTableProps) {
-  const hasFullTxs = transactions.length > 0 && isFullTransaction(transactions[0]!)
+  const hasAnyFull = transactions.some(isFullTransaction)
 
   return (
     <div className="overflow-x-auto">
@@ -45,9 +45,9 @@ export function TxListTable({ transactions, loading }: TxListTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Tx Hash</TableHead>
-            {hasFullTxs && <TableHead>From</TableHead>}
-            {hasFullTxs && <TableHead>To</TableHead>}
-            {hasFullTxs && <TableHead>Value</TableHead>}
+            {hasAnyFull && <TableHead>From</TableHead>}
+            {hasAnyFull && <TableHead>To</TableHead>}
+            {hasAnyFull && <TableHead>Value</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -55,33 +55,37 @@ export function TxListTable({ transactions, loading }: TxListTableProps) {
             <SkeletonRows />
           ) : transactions.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={hasFullTxs ? 4 : 1} className="text-muted-foreground text-center">
+              <TableCell colSpan={hasAnyFull ? 4 : 1} className="text-muted-foreground text-center">
                 No transactions
               </TableCell>
             </TableRow>
-          ) : hasFullTxs ? (
-            (transactions as Transaction[]).map((tx) => (
-              <TableRow key={tx.hash}>
-                <TableCell><TxLink hash={tx.hash} /></TableCell>
-                <TableCell><AddressLink address={tx.from} /></TableCell>
-                <TableCell>
-                  {tx.to ? (
-                    <AddressLink address={tx.to} />
-                  ) : (
-                    <span className="text-muted-foreground italic">Contract Creation</span>
-                  )}
-                </TableCell>
-                <TableCell className="font-mono text-sm">
-                  {formatEther(tx.value)} ETH
-                </TableCell>
-              </TableRow>
-            ))
           ) : (
-            (transactions as string[]).map((hash) => (
-              <TableRow key={hash}>
-                <TableCell><TxLink hash={hash} /></TableCell>
-              </TableRow>
-            ))
+            transactions.map((entry) => {
+              if (isFullTransaction(entry)) {
+                return (
+                  <TableRow key={entry.hash}>
+                    <TableCell><TxLink hash={entry.hash} /></TableCell>
+                    <TableCell><AddressLink address={entry.from} /></TableCell>
+                    <TableCell>
+                      {entry.to ? (
+                        <AddressLink address={entry.to} />
+                      ) : (
+                        <span className="text-muted-foreground italic">Contract Creation</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {formatEther(entry.value)} ETH
+                    </TableCell>
+                  </TableRow>
+                )
+              }
+              return (
+                <TableRow key={entry}>
+                  <TableCell><TxLink hash={entry} /></TableCell>
+                  {hasAnyFull && <TableCell colSpan={3} />}
+                </TableRow>
+              )
+            })
           )}
         </TableBody>
       </Table>

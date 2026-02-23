@@ -132,13 +132,16 @@ export function AddChainDialog({ open, onOpenChange }: AddChainDialogProps) {
           <DialogDescription>{t('chain.addDescription')}</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4">
-          <Input
-            placeholder={t('chain.endpointUrl')}
-            type="url"
-            value={endpointUrl}
-            onChange={(e) => { setEndpointUrl(e.target.value); setTestPassed(false); setShowDetails(false) }}
-            required
-          />
+          <div className="grid gap-1.5">
+            <label className="text-sm font-medium">{t('chain.endpointUrl')}</label>
+            <Input
+              placeholder="wss://your-node.example.com"
+              type="url"
+              value={endpointUrl}
+              onChange={(e) => { setEndpointUrl(e.target.value); setTestPassed(false); setShowDetails(false) }}
+              required
+            />
+          </div>
           {!showDetails && (
             <Button
               type="button"
@@ -152,13 +155,16 @@ export function AddChainDialog({ open, onOpenChange }: AddChainDialogProps) {
 
           {showDetails && (
             <>
-              <Input
-                placeholder={t('chain.httpRpcUrl')}
-                type="url"
-                value={rpcUrl}
-                onChange={(e) => { setRpcUrl(e.target.value); setTestPassed(false) }}
-                required
-              />
+              <div className="grid gap-1.5">
+                <label className="text-sm font-medium">{t('chain.httpRpcUrl')}</label>
+                <Input
+                  placeholder="https://your-node.example.com"
+                  type="url"
+                  value={rpcUrl}
+                  onChange={(e) => { setRpcUrl(e.target.value); setTestPassed(false) }}
+                  required
+                />
+              </div>
               <Button
                 type="button"
                 variant="outline"
@@ -168,34 +174,46 @@ export function AddChainDialog({ open, onOpenChange }: AddChainDialogProps) {
                 {testing ? t('chain.testing') : t('chain.testConnection')}
               </Button>
               {testPassed && (
-                <Input
-                  placeholder={t('chain.chainId')}
-                  type="number"
-                  value={chainId}
-                  disabled
-                />
+                <div className="grid gap-1.5">
+                  <label className="text-sm font-medium">{t('chain.chainId')}</label>
+                  <Input
+                    placeholder={t('chain.chainId')}
+                    type="number"
+                    value={chainId}
+                    disabled
+                  />
+                </div>
               )}
-              <Input
-                placeholder={t('chain.name')}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-              <Input
-                placeholder={t('chain.symbol')}
-                value={symbol}
-                onChange={(e) => setSymbol(e.target.value)}
-              />
-              <Select value={network} onValueChange={(v) => setNetwork(v as Chain['network'])}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t('chain.networkType')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mainnet">{t('chain.mainnet')}</SelectItem>
-                  <SelectItem value="testnet">{t('chain.testnet')}</SelectItem>
-                  <SelectItem value="devnet">{t('chain.devnet')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="grid gap-1.5">
+                <label className="text-sm font-medium">{t('chain.name')}</label>
+                <Input
+                  placeholder="My Chain"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <label className="text-sm font-medium">{t('chain.symbol')}</label>
+                <Input
+                  placeholder="ETH"
+                  value={symbol}
+                  onChange={(e) => setSymbol(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <label className="text-sm font-medium">{t('chain.networkType')}</label>
+                <Select value={network} onValueChange={(v) => setNetwork(v as Chain['network'])}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t('chain.networkType')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mainnet">{t('chain.mainnet')}</SelectItem>
+                    <SelectItem value="testnet">{t('chain.testnet')}</SelectItem>
+                    <SelectItem value="devnet">{t('chain.devnet')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <DialogFooter>
                 <Button type="submit" disabled={!testPassed}>{t('chain.save')}</Button>
               </DialogFooter>

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useQueries } from '@tanstack/react-query'
 import { useViemClient } from './use-viem-client'
 import { useAppStore } from '@/stores/app-store'
@@ -19,6 +19,11 @@ function isBlockFinalized(blockNum: bigint, head: bigint | undefined): boolean {
  * so when the range slides by 1 on a new head block, only the single new
  * block is fetched from the network — the rest are served from cache.
  *
+ * To avoid a visual flash when the range slides (e.g. the chart briefly
+ * dropping a bar while the newest block loads), the hook buffers the
+ * previous complete dataset and only swaps to the new one once every
+ * block in the range has resolved.
+ *
  * Blocks are returned most-recent-first. Range is capped at MAX_BLOCKS.
  */
 export function useBlocks(from: bigint | undefined, to: bigint | undefined) {
@@ -35,7 +40,7 @@ export function useBlocks(from: bigint | undefined, to: bigint | undefined) {
     return nums
   }, [rangeValid, from, to])
 
-  return useQueries({
+  const raw = useQueries({
     queries: blockNumbers.map((num) => ({
       queryKey: ['block', rpcUrl, String(num), false] as const,
       queryFn: () => client.getBlock({ blockNumber: num, includeTransactions: false }),
@@ -45,12 +50,29 @@ export function useBlocks(from: bigint | undefined, to: bigint | undefined) {
       const blocks = results
         .map((r) => r.data)
         .filter(<T,>(b: T | undefined): b is T => b != null)
+      const allSettled = results.length === 0 || results.every((r) => !r.isLoading)
       return {
         data: blocks.length > 0 ? blocks : undefined,
-        isLoading: results.some((r) => r.isLoading),
+        isLoading: blocks.length === 0 && results.some((r) => r.isLoading),
+        allSettled,
         isError: results.some((r) => r.isError),
         error: results.find((r) => r.error)?.error ?? null,
       }
     },
   })
+
+  // Keep the previous complete dataset visible until every block in the
+  // new range has loaded, preventing a brief flash of partial data when
+  // the range slides by one block on a new head.
+  const prevData = useRef(raw.data)
+  if (raw.allSettled && raw.data != null) {
+    prevData.current = raw.data
+  }
+
+  return {
+    data: raw.allSettled ? raw.data : (prevData.current ?? raw.data),
+    isLoading: prevData.current == null && raw.isLoading,
+    isError: raw.isError,
+    error: raw.error,
+  }
 }

@@ -15,6 +15,7 @@ export function ChainDropdown() {
   const removeCustomChain = useAppStore((s) => s.removeCustomChain)
   const allChains = useAllChains()
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const isCustom = (chainId: number) => !defaultChains.some((c) => c.id === chainId)
 
@@ -25,11 +26,12 @@ export function ChainDropdown() {
     }
     removeCustomChain(chainId)
     toast.success(t('chain.removed'))
+    setMenuOpen(false)
   }
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm">{selectedChain.displayName}</Button>
         </DropdownMenuTrigger>

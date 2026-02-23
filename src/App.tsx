@@ -65,7 +65,7 @@ export default function App() {
           <Footer />
         </div>
       </BrowserRouter>
-      <Toaster richColors position="top-right" />
+      <Toaster richColors closeButton position="top-right" />
     </QueryClientProvider>
   )
 }

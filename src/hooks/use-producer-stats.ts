@@ -4,15 +4,9 @@ import { useBlocks, MAX_BLOCKS } from './use-blocks'
 
 /**
  * Number of recent blocks to sample for producer statistics.
- * Must be less than MAX_BLOCKS (currently 250) to avoid silent query disabling.
+ * Clamped to MAX_BLOCKS - 1 to avoid silent query disabling.
  */
-const PRODUCER_BLOCKS = 200
-
-if (PRODUCER_BLOCKS >= MAX_BLOCKS) {
-  throw new Error(
-    `PRODUCER_BLOCKS (${PRODUCER_BLOCKS}) must be less than MAX_BLOCKS (${MAX_BLOCKS})`,
-  )
-}
+const PRODUCER_BLOCKS = Math.min(200, MAX_BLOCKS - 1)
 
 export interface ProducerStat {
   /** Producer address, normalized to lowercase. */

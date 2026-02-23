@@ -1,10 +1,10 @@
 import type { Transaction } from 'viem'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { HashDisplay } from '@/components/shared/hash-display'
 import { BlockLink } from '@/components/shared/block-link'
 import { AddressLink } from '@/components/shared/address-link'
+import { DetailRow, SkeletonDetail } from '@/components/shared/detail-row'
 import { formatNumber, formatEther, formatGwei } from '@/lib/formatters'
 
 interface TxDetailProps {
@@ -12,33 +12,8 @@ interface TxDetailProps {
   loading?: boolean
 }
 
-function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="grid grid-cols-[180px_1fr] gap-4 border-b px-4 py-3 last:border-b-0">
-      <span className="text-muted-foreground text-sm font-medium">{label}</span>
-      <span className="text-sm break-all">{children}</span>
-    </div>
-  )
-}
-
-function SkeletonDetail() {
-  return (
-    <Card className="py-4">
-      <CardHeader><Skeleton className="h-6 w-40" /></CardHeader>
-      <CardContent>
-        {Array.from({ length: 9 }, (_, i) => (
-          <div key={i} className="grid grid-cols-[180px_1fr] gap-4 border-b px-4 py-3 last:border-b-0">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-48" />
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  )
-}
-
 export function TxDetail({ tx, loading }: TxDetailProps) {
-  if (loading || !tx) return <SkeletonDetail />
+  if (loading || !tx) return <SkeletonDetail rows={9} />
 
   const isPending = tx.blockNumber == null
   const inputDisplay =

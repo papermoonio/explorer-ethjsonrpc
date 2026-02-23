@@ -1,9 +1,9 @@
 import type { TransactionReceipt } from 'viem'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { BlockLink } from '@/components/shared/block-link'
 import { AddressLink } from '@/components/shared/address-link'
+import { DetailRow, SkeletonDetail } from '@/components/shared/detail-row'
 import { formatNumber, formatGwei } from '@/lib/formatters'
 
 interface TxReceiptProps {
@@ -12,33 +12,8 @@ interface TxReceiptProps {
   pending?: boolean
 }
 
-function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="grid grid-cols-[180px_1fr] gap-4 border-b px-4 py-3 last:border-b-0">
-      <span className="text-muted-foreground text-sm font-medium">{label}</span>
-      <span className="text-sm break-all">{children}</span>
-    </div>
-  )
-}
-
-function SkeletonReceipt() {
-  return (
-    <Card className="py-4">
-      <CardHeader><Skeleton className="h-6 w-40" /></CardHeader>
-      <CardContent>
-        {Array.from({ length: 7 }, (_, i) => (
-          <div key={i} className="grid grid-cols-[180px_1fr] gap-4 border-b px-4 py-3 last:border-b-0">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-48" />
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  )
-}
-
 export function TxReceipt({ receipt, loading, pending }: TxReceiptProps) {
-  if (loading) return <SkeletonReceipt />
+  if (loading) return <SkeletonDetail rows={7} />
   if (!receipt) {
     return (
       <Card className="py-4">

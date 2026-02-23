@@ -50,11 +50,15 @@ export function useBlocks(from: bigint | undefined, to: bigint | undefined) {
       const blocks = results
         .map((r) => r.data)
         .filter(<T,>(b: T | undefined): b is T => b != null)
-      const allSettled = results.length === 0 || results.every((r) => !r.isLoading)
+      // Use count-based completeness instead of isLoading — during query
+      // observer reconciliation isLoading can briefly report false for a
+      // new query before its observer is initialised, causing the buffer
+      // to be overwritten with partial data.
+      const isComplete = results.length > 0 && blocks.length === results.length
       return {
         data: blocks.length > 0 ? blocks : undefined,
         isLoading: blocks.length === 0 && results.some((r) => r.isLoading),
-        allSettled,
+        isComplete,
         isError: results.some((r) => r.isError),
         error: results.find((r) => r.error)?.error ?? null,
       }
@@ -65,12 +69,12 @@ export function useBlocks(from: bigint | undefined, to: bigint | undefined) {
   // new range has loaded, preventing a brief flash of partial data when
   // the range slides by one block on a new head.
   const prevData = useRef(raw.data)
-  if (raw.allSettled && raw.data != null) {
+  if (raw.isComplete && raw.data != null) {
     prevData.current = raw.data
   }
 
   return {
-    data: raw.allSettled ? raw.data : (prevData.current ?? raw.data),
+    data: raw.isComplete ? raw.data : (prevData.current ?? raw.data),
     isLoading: prevData.current == null && raw.isLoading,
     isError: raw.isError,
     error: raw.error,

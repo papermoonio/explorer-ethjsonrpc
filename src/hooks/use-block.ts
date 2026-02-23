@@ -55,7 +55,7 @@ export function useBlock(
       })
     },
     enabled: hashOrNumber != null && (isHash || blockNumber !== undefined),
-    staleTime: isFinalized(blockNumber, head) ? Infinity : 10_000,
+    staleTime: isHash || isFinalized(blockNumber, head) ? Infinity : 10_000,
   })
 }
 

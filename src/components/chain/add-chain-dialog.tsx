@@ -31,7 +31,14 @@ export function AddChainDialog({ open, onOpenChange }: AddChainDialogProps) {
   const [testPassed, setTestPassed] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
 
-  function resetForm() {
+  /** Remove cached clients that were created during testing but never saved. */
+  function cleanupTestedClients() {
+    if (rpcUrl) removeViemClient(rpcUrl)
+    if (wsUrl) removeWsClient(wsUrl).catch(() => {})
+  }
+
+  function resetForm(cleanup = true) {
+    if (cleanup) cleanupTestedClients()
     setEndpointUrl('')
     setName('')
     setChainId('')
@@ -147,7 +154,7 @@ export function AddChainDialog({ open, onOpenChange }: AddChainDialogProps) {
 
     addCustomChain(chain)
     toast.success(t('chain.saved'))
-    resetForm()
+    resetForm(false) // skip cleanup — clients are now in use by the saved chain
     onOpenChange(false)
   }
 

@@ -12,7 +12,29 @@ type Theme = 'light' | 'dark' | 'system'
 const themeOrder: Theme[] = ['light', 'dark', 'system']
 const themeIcons: Record<Theme, typeof Sun> = { light: Sun, dark: Moon, system: Monitor }
 
-export function Header() {
+function ExternalLinks() {
+  const { t } = useTranslation()
+  return (
+    <>
+      {env.docsUrl && (
+        <Button variant="ghost" size="icon" asChild>
+          <a href={env.docsUrl} target="_blank" rel="noopener noreferrer" aria-label={t('header.docs')}>
+            <BookOpen className="size-4" />
+          </a>
+        </Button>
+      )}
+      {env.githubUrl && (
+        <Button variant="ghost" size="icon" asChild>
+          <a href={env.githubUrl} target="_blank" rel="noopener noreferrer" aria-label={t('header.github')}>
+            <Github className="size-4" />
+          </a>
+        </Button>
+      )}
+    </>
+  )
+}
+
+function ThemeToggle({ label }: { label?: boolean }) {
   const { t } = useTranslation()
   const theme = useAppStore((s) => s.theme)
   const setTheme = useAppStore((s) => s.setTheme)
@@ -20,9 +42,27 @@ export function Header() {
 
   function cycleTheme() {
     const idx = themeOrder.indexOf(theme)
-    const next = themeOrder[(idx + 1) % themeOrder.length]!
-    setTheme(next)
+    setTheme(themeOrder[(idx + 1) % themeOrder.length]!)
   }
+
+  if (label) {
+    return (
+      <Button variant="outline" size="sm" onClick={cycleTheme}>
+        <ThemeIcon className="mr-2 size-4" />
+        {t('header.theme')}
+      </Button>
+    )
+  }
+
+  return (
+    <Button variant="ghost" size="icon" onClick={cycleTheme} aria-label={t('header.theme')}>
+      <ThemeIcon className="size-4" />
+    </Button>
+  )
+}
+
+export function Header() {
+  const { t } = useTranslation()
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -36,23 +76,8 @@ export function Header() {
         <div className="hidden flex-1 items-center justify-end gap-2 md:flex">
           <SearchBar />
           <ChainDropdown />
-          {env.docsUrl && (
-            <Button variant="ghost" size="icon" asChild>
-              <a href={env.docsUrl} target="_blank" rel="noopener noreferrer" aria-label={t('header.docs')}>
-                <BookOpen className="size-4" />
-              </a>
-            </Button>
-          )}
-          {env.githubUrl && (
-            <Button variant="ghost" size="icon" asChild>
-              <a href={env.githubUrl} target="_blank" rel="noopener noreferrer" aria-label={t('header.github')}>
-                <Github className="size-4" />
-              </a>
-            </Button>
-          )}
-          <Button variant="ghost" size="icon" onClick={cycleTheme} aria-label={t('header.theme')}>
-            <ThemeIcon className="size-4" />
-          </Button>
+          <ExternalLinks />
+          <ThemeToggle />
         </div>
 
         {/* Mobile controls */}
@@ -71,26 +96,10 @@ export function Header() {
                 <SearchBar />
                 <ChainDropdown />
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={cycleTheme}>
-                    <ThemeIcon className="mr-2 size-4" />
-                    {t('header.theme')}
-                  </Button>
+                  <ThemeToggle label />
                 </div>
                 <div className="flex items-center gap-2">
-                  {env.docsUrl && (
-                    <Button variant="ghost" size="icon" asChild>
-                      <a href={env.docsUrl} target="_blank" rel="noopener noreferrer" aria-label={t('header.docs')}>
-                        <BookOpen className="size-4" />
-                      </a>
-                    </Button>
-                  )}
-                  {env.githubUrl && (
-                    <Button variant="ghost" size="icon" asChild>
-                      <a href={env.githubUrl} target="_blank" rel="noopener noreferrer" aria-label={t('header.github')}>
-                        <Github className="size-4" />
-                      </a>
-                    </Button>
-                  )}
+                  <ExternalLinks />
                 </div>
               </div>
             </SheetContent>

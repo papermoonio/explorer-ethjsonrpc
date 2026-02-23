@@ -57,7 +57,9 @@ function parseChainConfigEntries(json: string): Chain[] {
 function buildDefaultChains(): Chain[] {
   if (env.chainsConfig) {
     try {
-      return parseChainConfigEntries(env.chainsConfig)
+      const parsed = parseChainConfigEntries(env.chainsConfig)
+      if (parsed.length > 0) return parsed
+      console.warn('VITE_CHAINS_CONFIG is an empty array, falling back to individual env vars')
     } catch (err) {
       console.error('Failed to parse VITE_CHAINS_CONFIG, falling back to individual env vars:', err)
     }

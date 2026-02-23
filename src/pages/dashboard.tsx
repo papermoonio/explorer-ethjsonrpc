@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { usePageTitle } from '@/hooks/use-page-title'
 import { Blocks, Link2, Fuel, Users, RefreshCw } from 'lucide-react'
 import { useBlockNumber } from '@/hooks/use-block-number'
 import { useBlocks } from '@/hooks/use-blocks'
+import { useBlockPagination } from '@/hooks/use-block-pagination'
 import {
   useChainId,
   useGasPrice,
@@ -16,7 +16,6 @@ import { BlockListTable } from '@/components/block/block-list-table'
 import { BlockPagination } from '@/components/block/block-pagination'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatNumber, formatGwei } from '@/lib/formatters'
-import { useAppStore } from '@/stores/app-store'
 
 const PAGE_SIZE = 15
 const CHART_BLOCKS = 30
@@ -36,25 +35,7 @@ export default function Dashboard() {
   const { data: peerCount, isLoading: peerCountLoading } = usePeerCount()
   const { data: syncData, isLoading: syncLoading } = useSyncing()
 
-  // Pagination state: offset from head block
-  const rpcUrl = useAppStore((s) => s.selectedChain.rpcUrl)
-  const [pageOffset, setPageOffset] = useState(0n)
-
-  // Reset pagination when chain changes
-  useEffect(() => {
-    setPageOffset(0n)
-  }, [rpcUrl])
-
-  const tableFrom =
-    head != null
-      ? head - BigInt(PAGE_SIZE - 1) - pageOffset < 0n
-        ? 0n
-        : head - BigInt(PAGE_SIZE - 1) - pageOffset
-      : undefined
-  const tableTo =
-    head != null
-      ? head - pageOffset
-      : undefined
+  const { from: tableFrom, to: tableTo, handleNavigate } = useBlockPagination(head, PAGE_SIZE)
 
   // Chart range: last CHART_BLOCKS blocks from head
   const chartFrom =
@@ -67,14 +48,6 @@ export default function Dashboard() {
 
   const { data: chartBlocks, isLoading: chartLoading } = useBlocks(chartFrom, chartTo)
   const { data: tableBlocks, isLoading: tableLoading } = useBlocks(tableFrom, tableTo)
-
-  const handleNavigate = useCallback(
-    (_from: bigint, to: bigint) => {
-      if (head == null) return
-      setPageOffset(head - to)
-    },
-    [head],
-  )
 
   return (
     <div className="space-y-6 p-6">

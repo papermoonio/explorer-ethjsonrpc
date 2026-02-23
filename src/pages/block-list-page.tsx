@@ -1,12 +1,11 @@
-import { useState, useCallback, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { usePageTitle } from '@/hooks/use-page-title'
 import { useBlockNumber } from '@/hooks/use-block-number'
 import { useBlocks } from '@/hooks/use-blocks'
+import { useBlockPagination } from '@/hooks/use-block-pagination'
 import { BlockListTable } from '@/components/block/block-list-table'
 import { BlockPagination } from '@/components/block/block-pagination'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAppStore } from '@/stores/app-store'
 
 const PAGE_SIZE = 15
 
@@ -14,13 +13,6 @@ export default function BlockListPage() {
   usePageTitle('Blocks')
   const { number } = useParams()
   const { data: head } = useBlockNumber()
-  const rpcUrl = useAppStore((s) => s.selectedChain.rpcUrl)
-  const [pageOffset, setPageOffset] = useState(0n)
-
-  // Reset pagination on chain or route param change
-  useEffect(() => {
-    setPageOffset(0n)
-  }, [rpcUrl, number])
 
   // Determine the anchor point: URL param or head block
   const anchor: bigint | undefined = (() => {
@@ -34,24 +26,8 @@ export default function BlockListPage() {
     return head
   })()
 
-  const rawTo = anchor != null ? anchor - pageOffset : undefined
-  const to = rawTo != null && rawTo < 0n ? 0n : rawTo
-  const from =
-    to != null
-      ? to - BigInt(PAGE_SIZE - 1) < 0n
-        ? 0n
-        : to - BigInt(PAGE_SIZE - 1)
-      : undefined
-
+  const { from, to, handleNavigate } = useBlockPagination(anchor, PAGE_SIZE, [number])
   const { data: blocks, isLoading } = useBlocks(from, to)
-
-  const handleNavigate = useCallback(
-    (_from: bigint, newTo: bigint) => {
-      if (anchor == null) return
-      setPageOffset(anchor - newTo)
-    },
-    [anchor],
-  )
 
   return (
     <div className="space-y-6 p-6">

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAppStore } from '@/stores/app-store'
 import { getViemClient, removeViemClient } from '@/lib/viem-client'
+import { getWsClient, removeWsClient } from '@/lib/ws-client'
 import type { Chain } from '@/config/chains'
 
 interface AddChainDialogProps {
@@ -76,19 +77,29 @@ export function AddChainDialog({ open, onOpenChange }: AddChainDialogProps) {
 
     try {
       if (isWs) {
-        // Accept WSS URL, derive HTTP, and verify via HTTP
+        // Validate the WebSocket endpoint directly
+        const wsClient = getWsClient(url)
+        if (!wsClient) {
+          toast.error(t('chain.testFailed'))
+          setTesting(false)
+          return
+        }
+        const remoteChainId = await wsClient.getChainId()
         setWsUrl(url)
+        setChainId(String(remoteChainId))
+
+        // Try to derive an HTTP URL as convenience (but don't fail if it doesn't work)
         const derivedHttp = url.replace(/^wss:\/\//, 'https://').replace(/^ws:\/\//, 'http://')
         try {
           const httpClient = getViemClient(derivedHttp)
-          const remoteChainId = await httpClient.getChainId()
+          await httpClient.getChainId()
           setRpcUrl(derivedHttp)
-          setChainId(String(remoteChainId))
           setTestPassed(true)
           toast.success(t('chain.testSuccess'))
         } catch {
           removeViemClient(derivedHttp)
           setRpcUrl('')
+          setTestPassed(false)
           toast.info(t('chain.httpRequired'))
         }
         setShowDetails(true)
@@ -104,7 +115,11 @@ export function AddChainDialog({ open, onOpenChange }: AddChainDialogProps) {
       }
     } catch {
       toast.error(t('chain.testFailed'))
-      if (!isWs) removeViemClient(url)
+      if (isWs) {
+        removeWsClient(url).catch(() => {})
+      } else {
+        removeViemClient(url)
+      }
     } finally {
       setTesting(false)
     }

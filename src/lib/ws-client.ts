@@ -37,12 +37,14 @@ export async function removeWsClient(wsUrl: string): Promise<void> {
   const client = wsClientCache.get(wsUrl)
   if (!client) return
 
+  // Evict immediately so concurrent getWsClient() calls create a fresh client
+  // instead of receiving one that is mid-close.
+  wsClientCache.delete(wsUrl)
+
   // viem WebSocket transports expose a `close` method on the transport
   // object, but the public type may not surface it — use optional chaining.
   const transport = client.transport as Record<string, unknown>
   if (typeof transport.close === 'function') {
     await (transport.close as () => Promise<void>)()
   }
-
-  wsClientCache.delete(wsUrl)
 }

@@ -28,6 +28,7 @@ interface ChainConfigEntry {
   rpcUrl: string
   wsUrl?: string
   symbol?: string
+  currencyName?: string
   network?: 'mainnet' | 'testnet' | 'devnet'
   decimals?: number
 }
@@ -46,7 +47,7 @@ function parseChainConfigEntries(json: string): Chain[] {
       wsUrl: entry.wsUrl || undefined,
       network: entry.network || 'mainnet',
       nativeCurrency: {
-        name: entry.symbol || 'ETH',
+        name: entry.currencyName || entry.symbol || 'ETH',
         symbol: entry.symbol || 'ETH',
         decimals: entry.decimals || 18,
       },

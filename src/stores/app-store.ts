@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { useMemo } from 'react'
+import { useMemo, useSyncExternalStore } from 'react'
 import { type Chain, defaultChains } from '@/config/chains'
 import { cleanupChainClients } from './chain-cleanup'
 
@@ -62,12 +62,23 @@ export function useAllChains(): Chain[] {
   return useMemo(() => [...defaultChains, ...customChains], [customChains])
 }
 
+const darkMql = typeof window !== 'undefined'
+  ? window.matchMedia('(prefers-color-scheme: dark)')
+  : null
+
+function subscribeToDarkMode(cb: () => void) {
+  darkMql?.addEventListener('change', cb)
+  return () => darkMql?.removeEventListener('change', cb)
+}
+
+function getOsDark() {
+  return darkMql?.matches ?? false
+}
+
 /** Resolve the effective theme ('light' | 'dark'), honouring 'system'. */
 export function useResolvedTheme(): 'light' | 'dark' {
   const theme = useAppStore((s) => s.theme)
+  const osDark = useSyncExternalStore(subscribeToDarkMode, getOsDark, () => false)
   if (theme !== 'system') return theme
-  if (typeof window === 'undefined') return 'light'
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light'
+  return osDark ? 'dark' : 'light'
 }

@@ -35,11 +35,6 @@ export function AddressTxList({ address }: AddressTxListProps) {
     headRef.current = undefined
   }, [address, rpcUrl])
 
-  // Refresh stableHead while at initial depth
-  useEffect(() => {
-    if (depth === 1 && head != null) headRef.current = head
-  }, [head, depth])
-
   const totalBlocks = BigInt(depth * BATCH_SIZE)
   const scanTo = stableHead
   const rawFrom = stableHead != null ? stableHead - totalBlocks + 1n : undefined

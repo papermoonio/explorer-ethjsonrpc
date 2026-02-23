@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAppStore } from '@/stores/app-store'
 import { getViemClient, removeViemClient } from '@/lib/viem-client'
 import { getWsClient, removeWsClient } from '@/lib/ws-client'
-import type { Chain } from '@/config/chains'
+import { defaultChains, type Chain } from '@/config/chains'
 
 interface AddChainDialogProps {
   open: boolean
@@ -130,7 +130,7 @@ export function AddChainDialog({ open, onOpenChange }: AddChainDialogProps) {
     const id = parseInt(chainId, 10)
     if (!name || !Number.isFinite(id) || id <= 0 || !rpcUrl) return
 
-    if (customChains.some((c) => c.id === id)) {
+    if (defaultChains.some((c) => c.id === id) || customChains.some((c) => c.id === id)) {
       toast.error(`Chain ID ${id} already exists`)
       return
     }
